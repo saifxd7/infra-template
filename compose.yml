@@ -1,0 +1,64 @@
+version: "3"
+services:
+  
+  db:
+    image: postgres:15-bookworm
+    ports:
+      - "5436:5432"
+    container_name: db_container
+    command: -c 'config_file=/etc/postgresql/postgresql.conf'
+    volumes:
+      - ./db:/var/lib/postgresql/data
+      - ./dba-postgres.conf:/etc/postgresql/postgresql.conf
+    cap_add:
+      - SYS_NICE
+    restart: always
+    env_file: .env
+    networks:
+      - backend_network
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U dba"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  
+  backend_product_service:
+    container_name: backend_product_service
+    build:
+      context: ./backend/services/product_service
+      dockerfile: Dockerfile.product
+    volumes:
+      - ./backend/services/product_service:/app/product_service
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    entrypoint: ["sh", "/app/start.sh"]
+    networks:
+      - backend_network
+
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.nginx
+    volumes:
+      - ./backend/services/product_service/staticfiles:/app/staticfiles/product_service
+    ports:
+      - "80:80"
+    depends_on:
+      - backend_product_service
+    networks:
+      - backend_network
+
+
+networks:
+  backend_network:
+    driver: bridge
