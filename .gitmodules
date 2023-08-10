@@ -1,3 +1,0 @@
-[submodule "product_service"]
-	path = product_service
-	url = git@github.com:saifxd7/product_service.git
