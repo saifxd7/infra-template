@@ -1,3 +1,6 @@
 [submodule "backend/services/product_service"]
 	path = backend/services/product_service
 	url = git@github.com:saifxd7/product_service.git
+[submodule "frontend_template"]
+	path = frontend_template
+	url = git@github.com:saifxd7/frontend_template.git

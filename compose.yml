@@ -58,6 +58,13 @@ services:
     networks:
       - backend_network
 
+  frontend:
+    container_name: frontend
+    build: 
+      context: ./frontend_template
+      dockerfile: Dockerfile.crud
+    ports:
+      - "3000:3000"
 
 networks:
   backend_network:
